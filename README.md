@@ -7,6 +7,10 @@ one thing DeepSeek Harness never had to deal with: on Claude, changing effort
 mid-conversation can throw away the prompt cache, so lowering effort has to pay
 for itself.
 
+**[Watch the one-minute explainer](docs/video/adaptive-effort-explainer.mp4)**,
+how it classifies prompts, where it hooks in, and the cache rule. Rendered from
+[`docs/video/render.js`](docs/video/render.js).
+
 | Turn | Level | Why |
 | --- | --- | --- |
 | "hi", "thanks!", "nice work" | `low` (if it pays, see below) | nothing to work on |
