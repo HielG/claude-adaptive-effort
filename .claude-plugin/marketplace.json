@@ -1,0 +1,5 @@
+{
+  "name": "claude-adaptive-effort",
+  "owner": { "name": "Hiel Gagarin" },
+  "plugins": [{ "name": "adaptive-effort", "source": "./" }]
+}

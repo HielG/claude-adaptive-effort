@@ -1,0 +1,57 @@
+{
+  "name": "adaptive-effort",
+  "version": "0.1.0",
+  "description": "Picks reasoning effort per turn from the prompt, and only drops it when the saving outweighs the prompt-cache rewrite.",
+  "author": { "name": "Hiel Gagarin" },
+  "license": "MIT",
+  "userConfig": {
+    "socialEffort": {
+      "type": "string",
+      "title": "Social turns",
+      "description": "Level for greetings and thanks",
+      "default": "low",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "trivialEffort": {
+      "type": "string",
+      "title": "Trivial asks",
+      "description": "Level for short asks with no complexity or judgment cue",
+      "default": "low",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "ideationEffort": {
+      "type": "string",
+      "title": "Ideation",
+      "description": "Level for brainstorming, concepts, positioning",
+      "default": "max",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "planningEffort": {
+      "type": "string",
+      "title": "Planning",
+      "description": "Level for plans, roadmaps, specs, architecture",
+      "default": "max",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "reviewEffort": {
+      "type": "string",
+      "title": "Review",
+      "description": "Level for review, audit, verify, critique",
+      "default": "max",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "complexEffort": {
+      "type": "string",
+      "title": "Complex or explicit",
+      "description": "Level for several complexity cues, complex pasted code, or 'think hard'",
+      "default": "max",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "cacheTtlMinutes": {
+      "type": "number",
+      "title": "Prompt cache lifetime (minutes)",
+      "description": "How long after a request its cache is assumed alive; past it, switching is free",
+      "default": 60
+    }
+  }
+}
