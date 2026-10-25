@@ -194,3 +194,46 @@ describe('a session', () => {
     expect(sent).toEqual(['high', 'high', 'low'])
   })
 })
+
+describe('the ledger', () => {
+  test('counts turns, dips and raises, and the cache a switch cost', async ($, on) => {
+    const sent: (Level | number | undefined)[] = []
+    const clock = mock.clock(on, { now: 1_000 })
+    mock.store(on)
+    engine(on, sent, () => 80_000)
+    on('turn.complete', (_, e) => ({ text: e.answer }))
+    await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+    const usage = { model: 'claude-opus-5-5', input_tokens: 100, output_tokens: 500, cache_read_input_tokens: 80_000, cache_creation_input_tokens: 1_000 }
+    const turn = async (turnId: string, text: string) => {
+      await $.prompt.submit({ text, wait: false, origin: { kind: 'composer' } })
+      const stream = $.turn.step({ turnId, index: 0, model: 'claude-opus-5-5', effort: 'high', messageCount: 1 })
+      for await (const _chunk of stream) {
+        // Drain the stream.
+      }
+      await $.turn.complete({ turnId, answer: '', durationMs: 1, isAborted: false, reason: 'answer', usage })
+    }
+
+    await turn('t1', 'fix the bug')
+    await turn('t2', 'thanks!')
+    await clock.advance(61 * 60_000)
+    await turn('t3', 'thanks!')
+    await turn('t4', 'review the payment module')
+    expect(sent).toEqual(['high', 'high', 'low', 'max'])
+
+    // t2 held (warm cache), t3 dipped (cold), t4 raised on a warm cache: the
+    // request after it read 80,000 of the 81,600 the last prompt carried.
+    const shown = await $.command.run({
+      command: 'adaptive-effort',
+      args: '',
+      origin: { kind: 'composer' },
+      presentation: { isFullscreen: false, columns: 100 },
+    })
+    expect(shown.text).toContain('Turns per level   low 1 · high 2 · max 1')
+    expect(shown.text).toContain('Raises            1')
+    expect(shown.text).toContain('Thinking saved    ~3,500 output tokens (17,500)')
+    expect(shown.text).toContain('Cache cost paid   1,840')
+    expect(shown.text).toContain('Extra on raises   ~0 output tokens (0)')
+    expect(shown.text).toContain('Dips taken/held   1 / 1')
+    expect(shown.text).toContain('Net from dips     +15,660')
+  })
+})

@@ -37,15 +37,43 @@ rewrites the conversation's cache on models that send it that way, so:
   `cacheTtlMinutes`), or once this machine has measured that the model keeps
   its cache across a switch. Otherwise the turn stays at your level.
 
-Two things are measured as you work and kept across sessions: the output tokens
-a turn spends at each level (replacing the built-in estimates after 3 turns),
-and whether an effort switch kept the cache for that model.
+Three things are measured as you work and kept across sessions: the output
+tokens a turn spends at each level (replacing the built-in estimates after 3
+turns), whether an effort switch kept the cache for that model, and a savings
+ledger.
 
 ## Seeing what it did
 
-- The status line shows the level and reason for the current turn.
-- `/adaptive-effort` lists the last ten decisions with the switch cost and
-  saving behind each, and what has been measured.
+- The status line shows the level and reason for the current turn. `(held)`
+  means the prompt asked for a dip that would have cost more than it saved.
+- `/adaptive-effort` shows the savings ledger for this session and for all
+  sessions, the last ten decisions with the switch cost and saving behind
+  each, and what has been measured.
+
+### The savings ledger
+
+It compares every turn with running it at your own level:
+
+```
+This session
+  Turns per level   low 3 · high 14 · max 2
+  Raises            2
+  Dips taken/held   3 / 6
+  Thinking saved    ~9,600 output tokens (48,000)
+  Cache cost paid   12,400
+  Net from dips     +35,600
+  Extra on raises   ~11,000 output tokens (55,000), spent on purpose
+  Net overall       -19,400
+```
+
+- **Thinking saved** is what dipped turns spent less than the average turn at
+  your level. **Extra on raises** is what raised turns spent more.
+- **Cache cost paid** is measured, not estimated: on the first request after
+  each switch, the tokens that should have come from the cache and did not.
+- Figures in brackets and the nets are in uncached-input-token equivalents
+  (output counts 5x, a cache rewrite 1.15x), so tokens of different prices add
+  up. **Net from dips** is the efficiency gained; **Net overall** also takes
+  off the thinking that raises bought on purpose.
 
 ## Settings
 

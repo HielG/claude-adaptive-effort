@@ -197,8 +197,8 @@ export const PRIOR_OUTPUT: Readonly<Record<Level, number>> = {
  * Prices relative to an uncached input token, the same on every current
  * Claude model: output 5x, a cache write 1.25x, a cache read 0.1x.
  */
-const OUTPUT_PRICE = 5;
-const CACHE_REWRITE = 1.25 - 0.1;
+export const OUTPUT_PRICE = 5;
+export const CACHE_REWRITE = 1.25 - 0.1;
 
 export type CacheView = {
   /** Whether the last request is recent enough for its cache to be alive. */

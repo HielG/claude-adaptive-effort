@@ -1,6 +1,6 @@
 {
   "name": "adaptive-effort",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Picks reasoning effort per turn from the prompt, and only drops it when the saving outweighs the prompt-cache rewrite.",
   "author": { "name": "Hiel Gagarin" },
   "license": "MIT",
