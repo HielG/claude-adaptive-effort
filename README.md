@@ -7,9 +7,11 @@ one thing DeepSeek Harness never had to deal with: on Claude, changing effort
 mid-conversation can throw away the prompt cache, so lowering effort has to pay
 for itself.
 
-**[Watch the one-minute explainer](docs/video/adaptive-effort-explainer.mp4)**,
-how it classifies prompts, where it hooks in, and the cache rule. Rendered from
-[`docs/video/render.js`](docs/video/render.js).
+**[Watch the one-minute explainer](docs/video/adaptive-effort-explainer-narrated.mp4)**,
+how it classifies prompts, where it hooks in, and the cache rule
+([silent version](docs/video/adaptive-effort-explainer.mp4)).
+Narration: AI voice (Gemini speech generation); music synthesized locally.
+Built by the scripts in [`docs/video`](docs/video/narration.md).
 
 | Turn | Level | Why |
 | --- | --- | --- |
