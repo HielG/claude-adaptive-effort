@@ -4,6 +4,8 @@
 #
 #   node music.js && node tts.js && bash mix.sh
 #     -> adaptive-effort-explainer-narrated.mp4
+#   bash mix.sh short
+#     -> adaptive-effort-short.mp4 (opens on the hook, no lead-in)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -11,12 +13,24 @@ VIDEO=adaptive-effort-explainer.mp4
 OUT=adaptive-effort-explainer-narrated.mp4
 STARTS=(0 5 12 23 31 44 52)   # scene starts, seconds
 LENGTHS=(5 7 11 8 13 8 8)     # scene lengths, seconds
+FIRST=audio/line-1.wav        # the opening line
+FIRST_LEAD=0.2
+if [ "${1:-}" = short ]; then
+  VIDEO=adaptive-effort-short-silent.mp4
+  OUT=adaptive-effort-short.mp4
+  STARTS=(0 6 13 24 32 45 53)
+  LENGTHS=(6 7 11 8 13 8 7)
+  FIRST=audio/hook.wav
+  FIRST_LEAD=0
+fi
 LEAD=0.2                      # speech starts this long after its scene does
 TAIL=0.4                      # and ends at least this long before the next
 
 # Each clip: trim silence, then normalize to -16 LUFS.
 for i in 1 2 3 4 5 6 7; do
-  ffmpeg -v error -y -i "audio/line-$i.wav" -af \
+  src="audio/line-$i.wav"
+  [ "$i" = 1 ] && src="$FIRST"
+  ffmpeg -v error -y -i "$src" -af \
     "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000" \
     "audio/trim-$i.wav"
 done
@@ -29,8 +43,10 @@ for i in 0 1 2 3 4 5 6; do
   clip="audio/trim-$((i + 1)).wav"
   inputs+=(-i "$clip")
   len=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$clip")
-  tempo=$(awk -v l="$len" -v s="${LENGTHS[$i]}" -v a="$LEAD" -v b="$TAIL" 'BEGIN { t = l / (s - a - b); if (t < 1) t = 1; if (t > 1.10) t = 1.10; printf "%.3f", t }')
-  delay=$(awk -v s="${STARTS[$i]}" -v a="$LEAD" 'BEGIN { printf "%d", (s + a) * 1000 }')
+  lead=$LEAD
+  [ "$i" = 0 ] && lead=$FIRST_LEAD
+  tempo=$(awk -v l="$len" -v s="${LENGTHS[$i]}" -v a="$lead" -v b="$TAIL" 'BEGIN { t = l / (s - a - b); if (t < 1) t = 1; if (t > 1.10) t = 1.10; printf "%.3f", t }')
+  delay=$(awk -v s="${STARTS[$i]}" -v a="$lead" 'BEGIN { printf "%d", (s + a) * 1000 }')
   echo "line $((i + 1)): ${len}s, tempo ${tempo}x, at ${delay}ms"
   chains+="[$((i + 1)):a]atempo=${tempo},adelay=${delay}:all=1[v$i];"
   labels+="[v$i]"

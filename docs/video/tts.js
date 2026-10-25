@@ -88,10 +88,20 @@ async function speak(key, text) {
   return bytes.subarray(0, 4).toString() === 'RIFF' ? bytes : pcmToWav(bytes)
 }
 
+// The vertical Short opens on the hook instead of the title line.
+const HOOK = 'Your AI thinks just as hard about "thanks" as about your hardest bug.'
+
 async function main() {
   const key = apiKey()
   const dir = path.join(__dirname, 'audio')
   fs.mkdirSync(dir, { recursive: true })
+  if (process.env.HOOK) {
+    const wav = await speak(key, HOOK)
+    const file = path.join(dir, 'hook.wav')
+    fs.writeFileSync(file, wav)
+    console.log(`hook: ${file} (${wav.length} bytes)`)
+    return
+  }
   const only = process.env.LINES ? process.env.LINES.split(',').map(Number) : null
   for (let i = 0; i < LINES.length; i++) {
     if (only && !only.includes(i + 1)) continue
